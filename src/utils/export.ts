@@ -2,7 +2,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 // Force light mode styles for PDF export
-function applyLightModeStyles(element: HTMLElement) {
+function applyLightModeStyles(_element: HTMLElement) {
   const styleId = 'pdf-export-light-mode';
   const existingStyle = document.getElementById(styleId);
   if (existingStyle) existingStyle.remove();
