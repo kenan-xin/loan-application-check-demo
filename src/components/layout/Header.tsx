@@ -1,7 +1,5 @@
-import { ActionIcon, Container, Group, rem } from '@mantine/core';
+import { ActionIcon, Container, Group, Text, useMantineColorScheme } from '@mantine/core';
 import { IconSun, IconMoon } from '@tabler/icons-react';
-import { useMantineColorScheme } from '@mantine/core';
-import logoHongLeongDesktop from '../../assets/logo-hong-leong-desktop.png';
 
 export function Header() {
   const { setColorScheme, colorScheme } = useMantineColorScheme();
@@ -16,11 +14,14 @@ export function Header() {
     >
       <Container size="lg">
         <Group justify="space-between">
-          <img
-            src={logoHongLeongDesktop}
-            alt="Hong Leong Bank"
-            style={{ height: rem(36), width: 'auto' }}
-          />
+          <Text
+            fw={600}
+            size="xl"
+            c="light-dark(var(--mantine-color-hlbNavy-8), var(--mantine-color-hlbNavy-3))"
+            style={{ letterSpacing: '-0.5px' }}
+          >
+            XY Bank
+          </Text>
           <ActionIcon
             variant="subtle"
             color="gray"

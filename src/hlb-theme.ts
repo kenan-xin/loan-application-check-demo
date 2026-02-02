@@ -35,7 +35,7 @@ export const hlbTheme: MantineThemeOverride = {
   },
 
   primaryColor: 'hlbNavy',
-  primaryShade: 8,
+  primaryShade: { light: 8, dark: 3 },
 
   /** =========================
    *  TYPOGRAPHY
@@ -104,7 +104,16 @@ export const hlbTheme: MantineThemeOverride = {
       styles: () => ({
         root: {
           borderColor: 'light-dark(var(--mantine-color-bankGray-2), var(--mantine-color-bankGray-7))',
-          backgroundColor: 'light-dark(#ffffff, var(--mantine-color-bankGray-9))',
+          backgroundColor: 'light-dark(#ffffff, #25262b)',
+        },
+      }),
+    },
+
+    Paper: {
+      styles: () => ({
+        root: {
+          backgroundColor: 'light-dark(#ffffff, #25262b)',
+          borderColor: 'light-dark(var(--mantine-color-bankGray-2), var(--mantine-color-bankGray-7))',
         },
       }),
     },

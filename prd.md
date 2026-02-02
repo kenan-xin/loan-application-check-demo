@@ -3,12 +3,12 @@ Product Requirements Document (PRD)
 
 Term Loan Application Demo Dashboard (Updated Flow)
 
-Hong Leong Bank Malaysia
+XY Bank
 ---
 
 1. Overview
 
-This demo showcases how an AI-assisted workflow processes Business Term Loan (BTL) applications for Hong Leong Bank Malaysia.
+This demo showcases how an AI-assisted workflow processes Business Term Loan (BTL) applications for XY Bank.
 The demo focuses on:
 - Uploading application documents
 - Running automated checks via AI

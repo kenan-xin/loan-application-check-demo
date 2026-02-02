@@ -103,7 +103,7 @@ export function ProcessingPage() {
           <Stack gap="md">
             <Stack gap="sm" align="center">
               <Center>
-                <Loader size="xl" color="var(--mantine-color-hlbNavy-8)" />
+                <Loader size="xl" color="light-dark(var(--mantine-color-hlbNavy-8), var(--mantine-color-hlbNavy-3))" />
               </Center>
               <Text fw={500} ta="center">
                 Extracting data from documents...
@@ -117,7 +117,7 @@ export function ProcessingPage() {
                   size="sm"
                   c={
                     index === visibleStepIndex - 1 && isProcessing
-                      ? 'var(--mantine-color-gray-8)'
+                      ? 'light-dark(var(--mantine-color-gray-8), var(--mantine-color-gray-2))'
                       : 'dimmed'
                   }
                   style={

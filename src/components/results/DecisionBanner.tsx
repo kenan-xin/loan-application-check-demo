@@ -75,7 +75,7 @@ export function DecisionBanner({ result, onIssuesChange, highlightedIssueNumber 
               borderRadius: '4px',
               backgroundColor:
                 highlightedIssueNumber === issue.number
-                  ? 'rgba(254, 226, 226, 1)'
+                  ? 'light-dark(rgba(254, 226, 226, 1), rgba(80, 30, 30, 0.5))'
                   : 'transparent',
               transition: 'background-color 1.5s ease-out, padding 0.3s ease',
               border:

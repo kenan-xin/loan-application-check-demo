@@ -17,7 +17,7 @@ const router = createBrowserRouter(
     },
   ],
   {
-    basename: '/hl-bank-demo',
+    basename: '/bank-demo',
   }
 );
 

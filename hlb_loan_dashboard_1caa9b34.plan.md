@@ -1,6 +1,6 @@
 ---
 name: HLB Loan Dashboard
-overview: Build a professional loan application analysis dashboard for Hong Leong Bank with document upload, AI processing, and results display with eligibility checks, dark mode support, and PDF export functionality.
+overview: Build a professional loan application analysis dashboard for XY Bank with document upload, AI processing, and results display with eligibility checks, dark mode support, and PDF export functionality.
 todos:
   - id: setup-env
     content: Create .env and .env.development files with API URL configuration
@@ -46,7 +46,7 @@ todos:
     status: pending
 ---
 
-# Hong Leong Bank Loan Application Dashboard Implementation Plan
+# XY Bank Loan Application Dashboard Implementation Plan
 
 ## Architecture Overview
 
