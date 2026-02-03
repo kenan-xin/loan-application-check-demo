@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Center, Container, Loader, Paper, Stack, Text, Title } from '@mantine/core';
+import { useMutation } from '@tanstack/react-query';
 import { AppShell } from '../../components/layout/AppShell';
 import { useApplicationStore } from '../../stores/applicationStore';
 import type { ApiResponse } from '../../types/api';
@@ -39,10 +40,10 @@ const AnimatedDot = ({ isActive }: { isActive: boolean }) => {
 
 const STEP_DURATION = 30000; // 30 seconds per step (2 minutes total for 4 steps)
 
-async function analyzeApplication(applicationForm: File, creditReport: File): Promise<ApiResponse> {
+async function analyzeApplication(files: { applicationForm: File; creditReport: File }): Promise<ApiResponse> {
   const formData = new FormData();
-  formData.append('application_form', applicationForm);
-  formData.append('credit_report', creditReport);
+  formData.append('application_form', files.applicationForm);
+  formData.append('credit_report', files.creditReport);
 
   const response = await fetch('/api/analyze', {
     method: 'POST',
@@ -60,7 +61,18 @@ export default function ProcessingPage() {
   const router = useRouter();
   const { applicationForm, creditReport, setResult } = useApplicationStore();
   const [visibleStepIndex, setVisibleStepIndex] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(true);
+
+  const mutation = useMutation({
+    mutationFn: () => analyzeApplication({ applicationForm: applicationForm!, creditReport: creditReport! }),
+    onSuccess: (data) => {
+      setResult(data);
+      setVisibleStepIndex(PROCESSING_STEPS.length);
+      setTimeout(() => router.push('/results'), 1000);
+    },
+    onError: () => {
+      router.push('/');
+    },
+  });
 
   useEffect(() => {
     if (!applicationForm || !creditReport) {
@@ -68,34 +80,25 @@ export default function ProcessingPage() {
       return;
     }
 
-    analyzeApplication(applicationForm, creditReport)
-      .then((data) => {
-        setResult(data);
-        setIsProcessing(false);
-        setVisibleStepIndex(PROCESSING_STEPS.length);
-        setTimeout(() => router.push('/results'), 1000);
-      })
-      .catch(() => {
-        // Navigate back to upload on error
-        router.push('/');
-      });
+    if (mutation.isPending) return;
+    mutation.mutate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [applicationForm, creditReport]);
+  }, [applicationForm, creditReport, mutation.isPending]);
 
   // Start showing first step immediately
   useEffect(() => {
-    if (visibleStepIndex === 0 && isProcessing) {
+    if (visibleStepIndex === 0 && mutation.isPending) {
       const timer = setTimeout(() => {
         setVisibleStepIndex(1);
       }, 100);
 
       return () => clearTimeout(timer);
     }
-  }, [visibleStepIndex, isProcessing]);
+  }, [visibleStepIndex, mutation.isPending]);
 
   // Animate remaining steps appearing one by one
   useEffect(() => {
-    if (visibleStepIndex >= PROCESSING_STEPS.length || !isProcessing || visibleStepIndex === 0) {
+    if (visibleStepIndex >= PROCESSING_STEPS.length || !mutation.isPending || visibleStepIndex === 0) {
       return;
     }
 
@@ -104,7 +107,7 @@ export default function ProcessingPage() {
     }, STEP_DURATION);
 
     return () => clearTimeout(timer);
-  }, [visibleStepIndex, isProcessing]);
+  }, [visibleStepIndex, mutation.isPending]);
 
   return (
     <AppShell>
@@ -137,12 +140,12 @@ export default function ProcessingPage() {
                   key={step.id}
                   size="sm"
                   c={
-                    index === visibleStepIndex - 1 && isProcessing
+                    index === visibleStepIndex - 1 && mutation.isPending
                       ? 'light-dark(var(--mantine-color-gray-8), var(--mantine-color-gray-2))'
                       : 'dimmed'
                   }
                   style={
-                    index === visibleStepIndex - 1 && isProcessing
+                    index === visibleStepIndex - 1 && mutation.isPending
                       ? {
                           animation: 'blink 2.5s ease-in-out infinite',
                           fontWeight: 500,
@@ -151,7 +154,7 @@ export default function ProcessingPage() {
                   }
                 >
                   • {step.text}
-                  <AnimatedDot isActive={index === visibleStepIndex - 1 && isProcessing} />
+                  <AnimatedDot isActive={index === visibleStepIndex - 1 && mutation.isPending} />
                 </Text>
               ))}
             </Stack>
