@@ -65,6 +65,8 @@ export default function ProcessingPage() {
 
   const mutation = useMutation({
     mutationFn: () => analyzeApplication({ applicationForm: applicationForm!, creditReport: creditReport! }),
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // 1s, 2s, 4s
     onSuccess: (data) => {
       setResult(data);
       setVisibleStepIndex(PROCESSING_STEPS.length);
