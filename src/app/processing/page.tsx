@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Center, Container, Loader, Paper, Stack, Text, Title } from '@mantine/core';
 import { useMutation } from '@tanstack/react-query';
@@ -61,6 +61,7 @@ export default function ProcessingPage() {
   const router = useRouter();
   const { applicationForm, creditReport, setResult } = useApplicationStore();
   const [visibleStepIndex, setVisibleStepIndex] = useState(0);
+  const hasMutated = useRef(false);
 
   const mutation = useMutation({
     mutationFn: () => analyzeApplication({ applicationForm: applicationForm!, creditReport: creditReport! }),
@@ -80,12 +81,13 @@ export default function ProcessingPage() {
       return;
     }
 
-    if (mutation.isPending) {
+    if (hasMutated.current) {
       return;
     }
+    hasMutated.current = true;
     mutation.mutate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [applicationForm, creditReport, mutation.isPending]);
+  }, [applicationForm, creditReport]);
 
   // Start showing first step immediately
   useEffect(() => {
