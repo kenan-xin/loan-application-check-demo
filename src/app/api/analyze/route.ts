@@ -12,6 +12,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Missing files' }, { status: 400 });
   }
 
+  const upstreamUrl = `${API_URL}/smart-api/account_manager`;
+  console.log('[analyze API] Starting upstream request to:', upstreamUrl);
+  console.log('[analyze API] Files:', { applicationForm: applicationForm.name, creditReport: creditReport.name });
+
   const upstreamFormData = new FormData();
   upstreamFormData.append('application_form', applicationForm);
   upstreamFormData.append('credit_report', creditReport);
@@ -19,8 +23,11 @@ export async function POST(request: NextRequest) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
+  const startTime = Date.now();
+
   try {
-    const response = await fetch(`${API_URL}/smart-api/account_manager`, {
+    console.log('[analyze API] Sending fetch request...');
+    const response = await fetch(upstreamUrl, {
       method: 'POST',
       headers: { accept: 'application/json' },
       body: upstreamFormData,
@@ -28,8 +35,12 @@ export async function POST(request: NextRequest) {
     });
     clearTimeout(timeoutId);
 
+    const duration = Date.now() - startTime;
+    console.log('[analyze API] Response received:', { status: response.status, duration: `${duration}ms` });
+
     if (!response.ok) {
       const responseText = await response.text();
+      console.error('[analyze API] Upstream error:', { status: response.status, body: responseText });
       try {
         const errorData = JSON.parse(responseText);
         return NextResponse.json({ ...errorData, status: response.status }, { status: response.status });
@@ -40,10 +51,14 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
+    console.log('[analyze API] Success');
     return NextResponse.json(data);
   } catch (error) {
     clearTimeout(timeoutId);
+    const duration = Date.now() - startTime;
+    console.error('[analyze API] Request failed:', { error, duration: `${duration}ms` });
     if (error instanceof Error && error.name === 'AbortError') {
+      console.error('[analyze API] Request timed out after', REQUEST_TIMEOUT, 'ms');
       return NextResponse.json({ error: 'Request timeout' }, { status: 504 });
     }
     return NextResponse.json({ error: 'Upstream request failed' }, { status: 502 });

@@ -39,22 +39,33 @@ const AnimatedDot = ({ isActive }: { isActive: boolean }) => {
 };
 
 const STEP_DURATION = 30000; // 30 seconds per step (2 minutes total for 4 steps)
+const CLIENT_TIMEOUT = 200000; // 3 min 20 sec (must be > server's 3 min timeout)
 
 async function analyzeApplication(files: { applicationForm: File; creditReport: File }): Promise<ApiResponse> {
   const formData = new FormData();
   formData.append('application_form', files.applicationForm);
   formData.append('credit_report', files.creditReport);
 
-  const response = await fetch('/api/analyze', {
-    method: 'POST',
-    body: formData,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), CLIENT_TIMEOUT);
 
-  if (!response.ok) {
-    throw new Error('Failed to analyse application');
+  try {
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error('Failed to analyse application');
+    }
+
+    return response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
   }
-
-  return response.json();
 }
 
 export default function ProcessingPage() {
