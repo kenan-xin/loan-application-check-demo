@@ -33,18 +33,10 @@ export default function ResultsPage() {
     }, 3000);
   }, []);
 
-  const handleBackToUpload = () => {
-    reset();
-    router.push('/');
-  };
-
-  if (!result) {
-    router.push('/');
-    return null;
-  }
-
   // Derive issue numbers directly from result
   const issueNumbers = useMemo(() => {
+    if (!result) return new Map();
+
     const issues: Issue[] = [];
     let issueNumber = 1;
 
@@ -65,6 +57,16 @@ export default function ResultsPage() {
     issues.forEach((issue) => map.set(issue.type, issue.number));
     return map;
   }, [result]);
+
+  const handleBackToUpload = () => {
+    reset();
+    router.push('/');
+  };
+
+  if (!result) {
+    router.push('/');
+    return null;
+  }
 
   const getIssueNumber = (type: Issue['type']) => issueNumbers.get(type);
 
