@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (!response.ok) {
-    return NextResponse.json({ error: 'Analysis failed' }, { status: response.status });
+    return NextResponse.json({ error: response }, { status: response.status });
   }
 
   const data = await response.json();
