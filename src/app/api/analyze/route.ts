@@ -22,7 +22,13 @@ export async function POST(request: NextRequest) {
   });
 
   if (!response.ok) {
-    return NextResponse.json({ error: response }, { status: response.status });
+    const responseText = await response.text();
+    try {
+      const errorData = JSON.parse(responseText);
+      return NextResponse.json({ ...errorData, status: response.status }, { status: response.status });
+    } catch {
+      return NextResponse.json({ error: responseText || 'Unknown error', status: response.status }, { status: response.status });
+    }
   }
 
   const data = await response.json();
