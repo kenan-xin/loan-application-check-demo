@@ -1,8 +1,11 @@
+'use client';
+
 import { useEffect, useState } from 'react';
-import { Container, Title, Stack, Text, Loader, Center, Paper } from '@mantine/core';
-import { useNavigate } from 'react-router-dom';
-import { useApplicationStore } from '../stores/applicationStore';
-import { useAnalyzeApplication } from '../api/account-manager';
+import { useRouter } from 'next/navigation';
+import { Center, Container, Loader, Paper, Stack, Text, Title } from '@mantine/core';
+import { AppShell } from '../../components/layout/AppShell';
+import { useApplicationStore } from '../../stores/applicationStore';
+import type { ApiResponse } from '../../types/api';
 
 interface ProcessingStep {
   id: number;
@@ -20,7 +23,9 @@ const AnimatedDot = ({ isActive }: { isActive: boolean }) => {
   const [dots, setDots] = useState(1);
 
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive) {
+      return;
+    }
 
     const interval = setInterval(() => {
       setDots((prev) => (prev >= 4 ? 1 : prev + 1));
@@ -34,34 +39,46 @@ const AnimatedDot = ({ isActive }: { isActive: boolean }) => {
 
 const STEP_DURATION = 30000; // 30 seconds per step (2 minutes total for 4 steps)
 
-export function ProcessingPage() {
-  const navigate = useNavigate();
+async function analyzeApplication(applicationForm: File, creditReport: File): Promise<ApiResponse> {
+  const formData = new FormData();
+  formData.append('application_form', applicationForm);
+  formData.append('credit_report', creditReport);
+
+  const response = await fetch('/api/analyze', {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to analyse application');
+  }
+
+  return response.json();
+}
+
+export default function ProcessingPage() {
+  const router = useRouter();
   const { applicationForm, creditReport, setResult } = useApplicationStore();
-  const mutate = useAnalyzeApplication();
   const [visibleStepIndex, setVisibleStepIndex] = useState(0);
   const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
     if (!applicationForm || !creditReport) {
-      navigate('/');
+      router.push('/');
       return;
     }
 
-    mutate.mutate(
-      { applicationForm, creditReport },
-      {
-        onSuccess: (data) => {
-          setResult(data);
-          setIsProcessing(false);
-          setVisibleStepIndex(PROCESSING_STEPS.length);
-          setTimeout(() => navigate('/results'), 1000);
-        },
-        onError: () => {
-          // Navigate back to upload on error
-          navigate('/');
-        },
-      },
-    );
+    analyzeApplication(applicationForm, creditReport)
+      .then((data) => {
+        setResult(data);
+        setIsProcessing(false);
+        setVisibleStepIndex(PROCESSING_STEPS.length);
+        setTimeout(() => router.push('/results'), 1000);
+      })
+      .catch(() => {
+        // Navigate back to upload on error
+        router.push('/');
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [applicationForm, creditReport]);
 
@@ -90,8 +107,9 @@ export function ProcessingPage() {
   }, [visibleStepIndex, isProcessing]);
 
   return (
-    <Container size="lg">
-      <Stack gap="xl" align="center" mt="xl">
+    <AppShell>
+      <Container size="lg">
+        <Stack gap="xl" align="center" mt="xl">
         <Title order={2} ta="center">
           Processing Application
         </Title>
@@ -103,7 +121,10 @@ export function ProcessingPage() {
           <Stack gap="md">
             <Stack gap="sm" align="center">
               <Center>
-                <Loader size="xl" color="light-dark(var(--mantine-color-hlbNavy-8), var(--mantine-color-hlbNavy-3))" />
+                <Loader
+                  size="xl"
+                  color="light-dark(var(--mantine-color-hlbNavy-8), var(--mantine-color-hlbNavy-3))"
+                />
               </Center>
               <Text fw={500} ta="center">
                 Extracting data from documents...
@@ -129,7 +150,8 @@ export function ProcessingPage() {
                       : {}
                   }
                 >
-                  • {step.text}<AnimatedDot isActive={index === visibleStepIndex - 1 && isProcessing} />
+                  • {step.text}
+                  <AnimatedDot isActive={index === visibleStepIndex - 1 && isProcessing} />
                 </Text>
               ))}
             </Stack>
@@ -139,7 +161,8 @@ export function ProcessingPage() {
         <Text size="sm" c="dimmed" ta="center">
           This process may take a few minutes. Please do not close this window.
         </Text>
-      </Stack>
-    </Container>
+        </Stack>
+      </Container>
+    </AppShell>
   );
 }
