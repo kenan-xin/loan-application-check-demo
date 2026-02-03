@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const API_URL = process.env.API_URL || 'https://dev-genie.001.gs';
-const REQUEST_TIMEOUT = 300000; // 5 minutes
+const REQUEST_TIMEOUT = 180000; // 3 minutes
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
