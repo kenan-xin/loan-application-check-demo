@@ -80,7 +80,9 @@ export default function ProcessingPage() {
       return;
     }
 
-    if (mutation.isPending) return;
+    if (mutation.isPending) {
+      return;
+    }
     mutation.mutate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [applicationForm, creditReport, mutation.isPending]);
